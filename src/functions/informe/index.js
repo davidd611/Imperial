@@ -1,5 +1,4 @@
-require('colors'); const fs = require('fs');
-const colors = require('colors');
+require('colors'); const fs = require('fs'), process = require('process');
 
 let date = new Date();
 let file = '';
@@ -24,8 +23,11 @@ function mensaje(type, by, message, continuar, args) {
   return res;
 }
 
-// REGISTRO------------------------------------------------------------------------------------------
+// MANEJO DE ERRORES---------------------------------------------------------------------------------
 
+process.on('uncaughtException', err => error('handler', err.message, true, err.stack))
+
+// REGISTRO------------------------------------------------------------------------------------------
 function establecer() {
   if (file.length <= 0) { 
     file = `${getDate().replace(/_/g, '-')}.log`; 

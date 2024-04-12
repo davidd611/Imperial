@@ -2,25 +2,34 @@ const discord = require("discord.js");
 
 /** * @param {discord.Client} client * @param {discord.Message} message */
 module.exports = (client, message) => {
-  client.informe.info('test', 'hola')
+  try {
+    console.log(`Mensaje: [${message.author.username.magenta.underline}] ${message.content.cyan}`)
+
+    let prefix = client.config.get(message.guild.id, "prefix")
+
+    if (message.author.bot) return;
+    if (message.content.startsWith(prefix) !== true) return;
+    const args = message.content.slice(prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase()
+    
+    try {
+      const cmd = client.commands.get(command)
+      cmd.run(client, message, ...args);
+    } catch {
+      client.informe.info('client', `No se encontro el comando ${command}`);
+    }
+  } catch(e) { client.informe.error('client', 'Ocurrio un error', true, e) }
   client.config.ensure(message.guild.id, {
     prefix: "",
-    ip: [],
+    list: {
+      server: {
+        name: [],
+        ip: []
+      },
+      modpack: {
+        name: [],
+        modpack: []
+      }
+    }
   })
-  
-  console.log(client.config.get(message.guild.id, 'prefix').length)
-  if (client.config.get(message.guild.id, "prefix") === "" || undefined) client.config.set(message.guild.id, "i!", "prefix")
-
-  if (message.author.bot) return;
-  if (message.content.startsWith(client.config.get(message.guild.id, "prefix"))) return;
-
-  const args = message.content.slice(client.config.get(message.guild.id, "prefix").lenght).trim().split(/ +/g);
-  const cmd = args.shift().toLocaleLowerCase()
-
-  try {
-    const command = client.commands.get(cmd)
-    command.run(client, message, ...args);
-  } catch {
-    client.informe.info('client', `No se encontro el comando ${cmd}`);
-  }
 }
