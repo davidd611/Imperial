@@ -101,9 +101,38 @@ module.exports = {
 
   // -----------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * 
+	 * @param {discord.Client} client 
+	 * @param {discord.Message} message 
+	 * @param {string[]} args 
+	 */
 	run: (client, message, args) => {
 		const opt = ["add", "remove", "clear", "list"]
-		message.reply('ok?')
+		/**
+		 * @param {string[]} argumentos
+		 * @returns 
+		 */
+		function verificarPermisos(argumentos) {
+			const permisos = {
+				administrator: message.member.permissions.has('Administrator'),
+				moderator: message.member.permissions.has('ModerateMembers')
+			}
+		}
+		/**
+		 * 
+		 * @param {string[]} argumentos 
+		 */
+		function verificarArgumentos(argumentos) {
+			let resultado = {
+				permitido: false
+			}
+			argumentos.map(i => {
+				const embed = new discord.EmbedBuilder()
+				.setAuthor({ iconURL: message.author.avatarURL(), name: message.author.username })
+				if (!i) { client }
+			});
+		}
 		try {
 			/**
 			var option = args[0], serverIP = args[1], serverName = args[2]
