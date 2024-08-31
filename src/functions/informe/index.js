@@ -1,6 +1,6 @@
-const DateText = require('./DateText');
-const LogColor = require('./LogColor');
-const LogEntry = require('./LogEntry');
+const DateText = require('./src/DateText');
+const LogColor = require('./src/LogColor');
+const LogEntry = require('./src/LogEntry');
 
 
 

@@ -1,7 +1,11 @@
-const Message = require('./Message');
-const Check = require('./Check');
+const Message = require('./src/Message');
+const Check = require('./src/Check');
+const Guild = require('./src/Guild');
+const Server = require('./src/Server');
 
 module.exports = {
-  Message: new Message(),
-  Check: new Check()
+  Message,
+  Check,
+  Guild,
+  Server
 }

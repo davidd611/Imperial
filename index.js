@@ -1,11 +1,9 @@
 const informe = require('./src/functions/informe/index');
 const commons = require('./src/functions/commons/index');
 const json = require('../config.json');
-const { Client, GatewayIntentBits, Partials, Collection, REST, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Collection, REST, Routes, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const Enmap = require('enmap');
-
-
 
 const client = new Client({
   intents: [
@@ -29,7 +27,7 @@ const client = new Client({
 });
 
 let events = 0, commands = 0, slashCommands = [];
-client.informe = informe;
+client.informe = informe.LogEntry;
 client.commands = new Collection();
 client.slashCommands = new Collection();
 client.config = new Enmap({ dataDir: './src/database', name: 'config', fetchAll: false, autoFetch: true, cloneLevel: 'deep' })
@@ -53,37 +51,35 @@ for (const categoria of comandos) {
       client.commands.set(nombreComando, command);
       commands++;
     } else {
-      client.informe.LogEntry.warn('handler', 'No se encontro ningun escrito - run -', true, comando, 'red', true)
+      client.informe.warn('handler', 'No se encontro ningun escrito - run -', true, comando, 'red', true)
     }
     if ('data' in command && 'execute' in command) {
       client.slashCommands.set(command.data.name, command);
       slashCommands.push(command.data.toJSON())
     } else {
-      client.informe.LogEntry.warn('handler', 'No se encontro ningun escrito - data - o - execute -', '', false, true, comando, 'red', true)
+      client.informe.warn('handler', 'Al archivo le faltan las propiedades - data - o - execute -', '', false, true, comando, 'red', true)
     }
   });
 }
-
-client.informe.LogEntry.info('handler', `- ${events.toString().green} - Eventos registrados`)
-client.informe.LogEntry.info('handler', `- ${commands.toString().green} - Comandos registrados`, false)
-client.informe.LogEntry.info('handler', `- ${slashCommands.length.toString().green} - Comandos de barra registrados`)
+client.informe.info('handler', `- ${events.toString().green} - Eventos cargados`)
+client.informe.info('handler', `- ${commands.toString().green} - Comandos cargados`, false)
+client.informe.info('handler', `- ${slashCommands.length.toString().green} - Comandos de barra cargados`);
 
 const rest = new REST().setToken(json.config.token.imperial);
 
 (async () => {
   try {
-
-    console.log(`refrescando ${slashCommands.length.toString().green} comandos de barra`);
+    client.informe.info('deploy', `- ${slashCommands.length.toString().green} - Comandos de barra recargandose en la aplicación`);
 
     const data = await rest.put(
-      Routes.applicationCommands(client.user.id),
+      Routes.applicationCommands(json.config.client.imperial),
       { body: slashCommands}
     )
 
-    console.log(`${data.length.toString().green} comandos de barra refrescados`)
-  } catch (e) { client.informe.LogEntry.error('handler', e) }
-})
-
+    client.informe.info('deploy', `- ${data.length.toString().green} - Comandos de barra recargados`);
+  } catch (e) { client.informe.error('deploy', e) }
+})();
+client.on('shardDisconnect', i => { console.log('[Desconectado]');  } )
 client.login(json.config.token.imperial)
 
-client.on('shardDisconnect', i => console.log('[Desconectado]'))
+

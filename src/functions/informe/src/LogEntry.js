@@ -5,18 +5,19 @@ const LogColors = new LogColor()
 
 
 
-module.exports = class LogEntry extends DateText {
+module.exports = class LogEntry{
   constructor() {
-    super()
     this.file = '';
+    /** @private */
+    this.DateText = new DateText()
+    /** @private */
     this.LogColors = new LogColor()
-    this.LogMessage
   }
   
   
   establecer() {
     if (this.file.length <= 0) {
-      this.file = `${this.getDate().replace(/_/g, '-')}.log`; 
+      this.file = `${this.DateText.getDate().replace(/_/g, '-')}.log`; 
       this.info('informer', 'Nombre de archivo establecido', true, this.file, 'cyan', true);
     }
   }
@@ -54,22 +55,22 @@ module.exports = class LogEntry extends DateText {
     let res
     
     this.establecer()
-    this.enviar('log', true, this.file, LogColors.simplificar(this.mensaje(type, by, message, continuar, args), true));
-    let fecha = this.estructurar().replace('[type][by] [message] args'.toUpperCase(), '')
+    this.enviar('log', true, this.file, LogColors.simplificar(this.DateText.mensaje(type, by, message, continuar, args), true));
+    let fecha = this.DateText.estructurar().replace('[type][by] [message] args'.toUpperCase(), '')
   
     let tipo = type.toUpperCase();
-    let out1 = this.mensaje(tipo, '', '')
+    let out1 = this.DateText.mensaje(tipo, '', '')
     .replace(fecha.split('][')[0].split('[')[1], LogColors.colorear(fecha.split('][')[0].split('[')[1], 'gray', false))
     .replace(fecha.split('][')[1].split(']')[0], LogColors.colorear(fecha.split('][')[1].split(']')[0], 'gray', false))
     .replace(tipo, LogColors.colorear(tipo, color1))
     .replace('[] ', '').replace('[] ', '');
   
-    let out2 = this.mensaje('', by.toUpperCase(), message)
+    let out2 = this.DateText.mensaje('', by.toUpperCase(), message)
     .replace(`${fecha}`, '').replace(`[]`, '')
     .replace(by.toUpperCase(), LogColors.colorear(by.toUpperCase(), color2))
     .replace(message, LogColors.colorear(message, color3, underline1));
   
-    let out3 = this.mensaje('', '', '', continuar, args)
+    let out3 = this.DateText.mensaje('', '', '', continuar, args)
     .replace(`${fecha}`, '').replace(`[][] [] `, '')
     .replace(args, LogColors.colorear(`${args}`, color4, underline2));
     res = out1 + out2 + out3;

@@ -8,5 +8,5 @@ const discord = require('discord.js');
 
 module.exports = (client, guild) => {
   client.config.delete(guild.id)
-  client.informe.LogEntry.info('client', 'Se elimino el servidor', true, guild.name, 'magenta', true)
+  client.informe.info('client', 'Se elimino el servidor', true, guild.name, 'magenta', true)
 }
