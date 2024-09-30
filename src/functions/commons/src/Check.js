@@ -1,4 +1,4 @@
-const permissions = require('./permissions.json');
+const permissions = require('./statics.json').permissions;
 
 class Check {
   /** @param {[Interaction, args]} param @param {boolean} check */

@@ -1,4 +1,4 @@
-const discord = require('discord.js'), commons = require('../functions/commons/index')
+const discord = require('discord.js')
 
 /** * @param {discord.Client} client */
 

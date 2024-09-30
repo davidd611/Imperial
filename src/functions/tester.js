@@ -1,3 +1,4 @@
+/*
 require('colors'); const fs = require('fs'), process = require('process');
 
 let date = new Date();
@@ -162,3 +163,4 @@ module.exports = { error, info, warn, log, colorear, preparar, buscarParaAtras, 
 //-----------------------------------------------------------------------------------------------------
 // Todo terminado, se logro terminar el sistema de registro, a partir de ahora no entraran colores en
 // el archivo .log
+*/

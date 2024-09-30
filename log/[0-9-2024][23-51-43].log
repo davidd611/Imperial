@@ -1,0 +1,6 @@
+[0/9/2024][23:51:43] [INFO][INFORMER] [Nombre de archivo establecido] [0-9-2024][23-51-43].log
+[0/9/2024][23:51:43] [WARNING][HANDLER] [Al archivo le faltan las propiedades - data - o - execute -] test.js
+[0/9/2024][23:51:43] [INFO][HANDLER] [- 4 - Eventos cargados] 
+[0/9/2024][23:51:43] [INFO][HANDLER] [- 4 - Comandos cargados] 
+[0/9/2024][23:51:43] [INFO][HANDLER] [- 3 - Comandos de barra cargados] 
+[0/9/2024][23:51:43] [INFO][DEPLOY] [- 3 - Comandos de barra recargandose en la aplicación] 

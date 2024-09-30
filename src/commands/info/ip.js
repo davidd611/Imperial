@@ -144,6 +144,9 @@ module.exports = {
 				MessageCommon.embedField(mensajes.description.clear, mensajes.field.lista); 
 			} else if (parametro1 !== "" && parametro2 !== "") {
 				if (opcion === 'add' || opcion === 'añadir') {
+					let template = { ip: "", name: "", modpack: "", version: "" }
+					template.ip = parametro1; template.name = parametro2;
+					client.config.push(message.guild.id, template, "list.server");
 					client.config.push(message.guild.id, parametro1, 'list.server.ip');
 					client.config.push(message.guild.id, parametro2, 'list.server.name')
 					MessageCommon.embedField(mensajes.description.add, mensajes.field.añadir);

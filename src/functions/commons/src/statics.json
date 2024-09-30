@@ -1,0 +1,70 @@
+{
+  "permissions": [
+    { 
+      "alias": ["administrator", "administrador", "admin", "adm"], 
+      "permissions": ["Administrator"] 
+    },
+    { 
+      "alias": ["manager", "gerente", "manag" , "mng"], 
+      "permissions": [
+        "ManageChannels", 
+        "ManageEmojisAndStickers", 
+        "ManageEvents", 
+        "ManageGuild", 
+        "ManageGuildExpressions", 
+        "ManageMessages", 
+        "ManageNicknames", 
+        "ManageRoles", 
+        "ManageThreads", 
+        "ManageWebhooks"
+      ] 
+    },
+    { 
+      "alias": ["helper", "ayudate", "hlp"], 
+      "permissions": [
+        "BanMembers", 
+        "KickMembers", 
+        "MuteMembers", 
+        "DeafenMembers"
+      ] 
+    },
+    { 
+      "alias": ["user", "usuario", "usr"], 
+      "permissions": [
+        "SendMessages", 
+        "ViewChannel"
+      ] 
+    },
+    { 
+      "alias": [], 
+      "permissions": [] 
+    }
+  ],
+  "functions": [
+    {
+      "alias": ["list", "getall", "all", "view", "lista", "todo", "ver"],
+      "function": "getall",
+      "permissions": false
+    },
+    {
+      "alias": ["clear", "limpiar"],
+      "function": "clear",
+      "permissions": true
+    },
+    {
+      "alias": ["add", "añadir"],
+      "function": "add",
+      "permissions": true
+    },
+    {
+      "alias": ["remove", "remover"],
+      "function": "remove",
+      "permissions": true
+    },
+    {
+      "alias": ["edit", "editar"],
+      "function": "edit",
+      "permissions": true
+    }
+  ]
+}
