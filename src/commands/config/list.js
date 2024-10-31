@@ -57,30 +57,14 @@ module.exports = {
     const servidor = new Server([client, message]);
     const salida = servidor.list(entradas);
     console.log("[run] - entradas:\n", opcion, lista, contenido, posicion);
-    function fieldGen(name, value, inline) {
-      let TI = "";
-      console.log(value.length, value);
-      
-      const res = { 
-        name: name, 
-        value: "",
-        inline: inline 
-      }
-      let values = []
-      value.map((val) => {
-        if (val !== "") TI = "\`\`\`"; else TI = "";
-        values.push(`${TI}${val}${TI}`)
-      });
-      res.valie = `${values}`.replace(/,/g, "\n")
-      return res;
-    }
+    const mensaje = new Message([message, discord]);
     const embed = new discord.EmbedBuilder()
     .setDescription(`\`\`\`\n${salida.message}\`\`\``)
     if (salida.code === 500) {
       embed.setFields([
-        fieldGen("position", salida.content.position, true),
-        fieldGen("name", salida.content.name, true),
-        fieldGen("version", salida.content.version, true)
+        mensaje.arrayFieldGen("position", salida.content.position, true),
+        mensaje.arrayFieldGen("name", salida.content.name, true),
+        mensaje.arrayFieldGen("version", salida.content.version, true)
       ]);
     }
     message.reply({ embeds: [embed] });

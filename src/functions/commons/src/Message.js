@@ -22,7 +22,28 @@ class Message {
      .setDescription(description)
      .setFooter(this.timestamp())
    this.param[0].reply({ embeds: [embed] }) // Respuesta al usuario de uso
- }
+  }
+  /** @returns {string} */
+  cutArray(array) {
+    let res = [];
+    if (typeof array !== "object" || array === undefined) res = " Error: array param is missing or isn't in correct format";  
+    let reverse = array.reverse(); // invierte el orden del array
+    let endPos; // se coloca la posición
+    reverse.map(string => {
+      if (typeof endPos !== "number" && string !== "") endPos = reverse.indexOf(string);
+      if (typeof endPos === "number") res.push(string); // Lo añade al array que devolverá
+    });
+    return `\`\`\`\n${res.reverse()}\`\`\``; // Devuelve el array -res- en un string
+  }
+  /** @returns {object} */
+  arrayFieldGen(name, value, inline) {
+    const res = { 
+      name: name, 
+      value: this.cutArray(value).replace(/,/g, "\n"),
+      inline: inline 
+    }
+    return res;
+  }
   timestamp() {
     return {
       iconURL: this.param[0].guild.iconURL(),
