@@ -55,7 +55,12 @@ module.exports = {
     const posicion = args[3];
     const entradas = { option: opcion, list: lista, content: contenido, position: posicion }
     const servidor = new Server([client, message]);
-    const salida = servidor.list(entradas);
+    let salida
+    try {
+      salida = servidor.list(entradas);
+    } catch (e) {
+      client.informe.error("list.servidor.list", e)
+    }
     console.log("[run] - entradas:\n", opcion, lista, contenido, posicion);
     const mensaje = new Message([message, discord]);
     const embed = new discord.EmbedBuilder()
@@ -67,7 +72,48 @@ module.exports = {
         mensaje.arrayFieldGen("version", salida.content.version, true)
       ]);
     }
-    message.reply({ embeds: [embed] });
+    const component = new discord.ActionRowBuilder().addComponents(
+      new discord.StringSelectMenuBuilder()
+      .setCustomId("minecraft-server-list")
+      .setOptions(
+        new discord.StringSelectMenuOptionBuilder().setLabel("ip").setValue("sip"),
+        new discord.StringSelectMenuOptionBuilder().setLabel("version").setValue("sversion"),
+        new discord.StringSelectMenuOptionBuilder().setLabel("modpack").setValue("smodpack"),
+        new discord.StringSelectMenuOptionBuilder().setLabel("status").setValue("sstatus"),
+      )
+    );
+    message.reply({ embeds: [embed] })
+    .then(msg => {
+      if (salida.code === 500) msg.edit({ embeds: [embed], components: [component] });
+      const collector = msg.createMessageComponentCollector({componentType: discord.ComponentType.StringSelect, time: 900000})
+      collector.on("collect", async (collect) => {
+        try { await collect.deferUpdate() } catch (e) { client.informe.error("list.collector.deferUpdate", e) }
+        function editEmbedList(name, arr, p) {
+          if (typeof arr === typeof [""]) {
+            embed.setDescription(`\`\`\`\nLista de ${name}es\`\`\``)
+            .setFields([
+              mensaje.arrayFieldGen("position", salida.content.position, true),
+              mensaje.arrayFieldGen("name", salida.content.name, true),
+              mensaje.arrayFieldGen(name, arr, true)
+            ])
+            
+            if (p !== undefined) console.log("[list.reply.editEmbedList<name, arr, p>]: " + p);
+          }
+        }
+        const value = collect.values.shift();
+        switch (value) {
+          case "sip": editEmbedList("ip", salida.content.ip, value); break;
+          case "sversion": editEmbedList("version", salida.content.version, value); break;
+          case "smodpack": editEmbedList("modpack", salida.content.modpack, value); break;
+          case "sstatus": 
+            const java = await servidor.javaStatusList(salida.content.ip)
+            editEmbedList("status", java, value)
+            
+          break;
+        }
+        await msg.edit({ embeds: [embed], components: [component] })
+      })
+    });
 
     /**
      * Descripcion

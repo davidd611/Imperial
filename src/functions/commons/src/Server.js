@@ -1,5 +1,7 @@
 const minecraftServer = require("mcstatus-util");
+const { statusJava, statusBedrock } = require("node-mcstatus")
 const functions = require("./statics.json").functions;
+const { setTimeout } = require("timers")
 class Server {
   /**
    * @example new Server([client, message, discord])
@@ -35,7 +37,6 @@ class Server {
     return res;
   }
   add(args) {
-    
     const elements = this.client.config.get(this.interaction.guild.id, "list.server");
     const template = { ip: "", name: "", modpack: "", version: "" }
     if (args.list !== undefined) {
@@ -100,30 +101,42 @@ class Server {
     return this.response;
   }
   chooseFunc(args) {
-    
-    const esto = this;
-    const memberPermssions = this.interaction.member.permissions.has("Administrator");
+    let itHave = false;
+    const clase = this;
+    const memberPermissions = this.interaction.member.permissions.has("Administrator");
     functions.map((element) => {
+      const alias = element.alias.includes(args.option);
+      console.log("[Server.ChooseFunc]", args.option, alias)
+      if (alias) { 
+        itHave = true; 
+        if (element.permissions) {
+          if (memberPermissions) this.response = this[element.function](args);
+          else this.setRes(200, 'permisos insuficientes para realizar esta acción');
+        } else this.response = this[element.function](args) } 
+      else { 
+        if (!itHave) this.setRes(110, `No se reconoce la opción ${args.option}`);
+      }
+        /*
       element.alias.map((alias) => {
         if (args.option === alias) {
           if (element.permissions) {
-            if (memberPermssions) this.response = esto[element.function](args);
-            else esto.this.setRes(200,  'permisos insuficientes para realizar esta acción');
+            if (memberPermissions) this.response = esto[element.function](args);
+            else esto.setRes(200,  'permisos insuficientes para realizar esta acción');
           } else this.response = esto[element.function](args);
-          console.log(`F.R: ${element.function} -`, this.response);
-        }
+        } // else esto.setRes(110, `No se reconoce la opción ${args.option}`);
         //console.log("F: chooseFunc{element()} -", element)
-      })
+      })*/
     })
     return this.response;
   }
 
   /** 
+   * @description 
+   * Takes an Array of strings, and depending of the content return a new value without modifiy the orginal Array
    * i! list ip edit nuevaIp 0
    * i! list ip add nuevaIp
    * i! list ip remove nuevaIp 0
    * i! list ip clear
-   * i! list ip get 0
    * i! list ip list
    * @example
    * const values = [
@@ -137,7 +150,8 @@ class Server {
    * ]
    * const list = new Server(client, interaction).list(values)
    
-   * @param {Array} values 
+   * @param {string[]} values 
+   * 
    * codes = {
    *  100: valor no definido
    *  110: valor invalido
@@ -157,6 +171,24 @@ class Server {
     res.message = choiceRes.message;
     if (choiceRes.code === 500) res.content = choiceRes.content;
     //console.log('F: list -', values);
+    return res;
+  }
+  /** @param {String[]} listOfIp */
+  checkStatus(listOfIp) {
+    let res = [];
+    listOfIp.map((ip) => {
+      
+    })
+  }
+  /** @param {string[]} ipList @returns*/
+  async javaStatusList(ipList) {
+    let res = [];
+    const list = ipList.map(async (ip) => {
+      const java = await statusJava(ip).then(r => {
+      res.push(r.online? "online" : "offline"); });
+    }); 
+    await Promise.all(list)
+    //console.log("res: " + res);
     return res;
   }
   /** 

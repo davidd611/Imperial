@@ -33,14 +33,18 @@ class Message {
       if (typeof endPos !== "number" && string !== "") endPos = reverse.indexOf(string);
       if (typeof endPos === "number") res.push(string); // Lo añade al array que devolverá
     });
-    return `\`\`\`\n${res.reverse()}\`\`\``; // Devuelve el array -res- en un string
+    let retorno = `\`\`\`\n${res.reverse()}\`\`\``;
+    if (retorno.length === 7) retorno = " ";
+    array.reverse();
+    console.log(retorno)
+    return retorno // Devuelve el array -res- en un string
   }
   /** @returns {object} */
   arrayFieldGen(name, value, inline) {
     const res = { 
       name: name, 
       value: this.cutArray(value).replace(/,/g, "\n"),
-      inline: inline 
+      inline: inline??false
     }
     return res;
   }
