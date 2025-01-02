@@ -34,6 +34,7 @@ module.exports = {
   )
   .addStringOption(o => o.setName("content").setDescription("Nueva entrada o entrada existente"))
   .addIntegerOption(o => o.setName("position").setDescription("Posición de el elemento")),
+  /** @TODO Trabajar a partir de ahora en adaptar el contenido del comando run en el execute */
   /** @param {discord.Client} client * @param {discord.Interaction} interaction */
   execute: async(client, interaction) => {
     const entradas = {
@@ -85,9 +86,10 @@ module.exports = {
     message.reply({ embeds: [embed] })
     .then(msg => {
       if (salida.code === 500) msg.edit({ embeds: [embed], components: [component] });
+      servidor.javaStatusList();
       const collector = msg.createMessageComponentCollector({componentType: discord.ComponentType.StringSelect, time: 900000})
-      collector.on("collect", async (collect) => {
-        try { await collect.deferUpdate() } catch (e) { client.informe.error("list.collector.deferUpdate", e) }
+      collector.on("collect", (collect) => {
+        try { collect.deferUpdate() } catch (e) { client.informe.error("list.collector.deferUpdate", e) }
         function editEmbedList(name, arr, p) {
           if (typeof arr === typeof [""]) {
             embed.setDescription(`\`\`\`\nLista de ${name}es\`\`\``)
@@ -96,7 +98,6 @@ module.exports = {
               mensaje.arrayFieldGen("name", salida.content.name, true),
               mensaje.arrayFieldGen(name, arr, true)
             ])
-            
             if (p !== undefined) console.log("[list.reply.editEmbedList<name, arr, p>]: " + p);
           }
         }
@@ -106,12 +107,11 @@ module.exports = {
           case "sversion": editEmbedList("version", salida.content.version, value); break;
           case "smodpack": editEmbedList("modpack", salida.content.modpack, value); break;
           case "sstatus": 
-            const java = await servidor.javaStatusList(salida.content.ip)
-            editEmbedList("status", java, value)
-            
+          const estadoJava = servidor.getall().content.status;
+          editEmbedList("status", estadoJava, value);
           break;
         }
-        await msg.edit({ embeds: [embed], components: [component] })
+        msg.edit({ embeds: [embed], components: [component] });
       })
     });
 

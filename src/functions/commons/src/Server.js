@@ -19,10 +19,10 @@ class Server {
   }
   setRes(codigo, mensaje, contenido) // esto se supone que redefine la respuesta
   { this.response = { code: codigo, message: mensaje, content: contenido??null } }
-  /** @returns { { code: number, message: string, content: { position, ip, name, modpack, version } } } */
+  /** @returns { { code: number, message: string, content: { position, ip, name, modpack, version, status } } } */
   getall() {
     let res = { code: 0, message: "", content: null }
-    const elementList = { position: [], ip: [], name: [], modpack: [], version: [] }
+    const elementList = { position: [], ip: [], name: [], modpack: [], version: [], status: [] }
     const elements = this.client.config.get(this.interaction.guild.id, "list.server")
     if (elements.length > 0) {
       elements.map((element) => {
@@ -38,7 +38,7 @@ class Server {
   }
   add(args) {
     const elements = this.client.config.get(this.interaction.guild.id, "list.server");
-    const template = { ip: "", name: "", modpack: "", version: "" }
+    const template = { ip: "", name: "", modpack: "", version: "", status: "" }
     if (args.list !== undefined) {
       if (template[args.list] !== undefined) {
         template[args.list] = args.content??null;
@@ -181,15 +181,26 @@ class Server {
     })
   }
   /** @param {string[]} ipList @returns*/
-  async javaStatusList(ipList) {
+  javaStatusList() {
+    const elements = this.client.config.get(this.interaction.guild.id, "list.server");
+    if (elements.length > 0) {
+      elements.map((element) => {
+        statusJava(element["ip"])
+        .then((javaServer) => { element["status"] = javaServer.online?"online":"offline" });
+      });
+    }
+
+
+  /* javaStatusList(ipList) {
     let res = [];
     const list = ipList.map(async (ip) => {
-      const java = await statusJava(ip).then(r => {
-      res.push(r.online? "online" : "offline"); });
+      const java = await statusJava(ip);
+      res.push(java.online? "online":"offline");
+      console.log(`[Server.javaStatusList]${ip}: ${java.online?"online":"offline"}`);
     }); 
-    await Promise.all(list)
+    
     //console.log("res: " + res);
-    return res;
+    return res;*/
   }
   /** 
   @param {string} ip 

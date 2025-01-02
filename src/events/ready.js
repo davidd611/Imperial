@@ -13,11 +13,12 @@ module.exports = (client) => {
       if (elements.length > 0) {
         elements.map((element) => {
           if (element.ip !== undefined) ipList.push(element.ip);
+          console.log(element)
         })
-        const serverGetter = new functions.Server(client, guild, discord);
-        const getServerStatus = serverGetter.javaStatusList(ipList);
+        //const serverGetter = new functions.Server(client, guild, discord);
+        //const getServerStatus = serverGetter.javaStatusList(ipList);
         console.log(`${guild.name}<${guild.id}>:\n`, guildConfig);
-        console.log(getServerStatus); 
+        //console.log(getServerStatus); 
       }
     }
   })

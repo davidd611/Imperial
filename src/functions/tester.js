@@ -1,17 +1,16 @@
 const { statusJava } = require("node-mcstatus"); 
 const ips = [ "mc.hypixel.net", "mc.librecraft.net", "play.twi.en" ];
 
-function checkStatusJava(ipIn) {
+async function checkStatusJava(ipIn) {
   let res = []
-  ipIn.map((ip) => {
-    const server = statusJava(ip)
-    .then((response) => {
-      res += response.online
-    })
+  let mapa = await ipIn.map(async (ip) => {
+    const server = await statusJava(ip);
+    res.push(server.online)
+    console.log(`[checkStatusJava] ${ip}: ${server.online?"online":"offline"}`)
   })
-  setTimeout(() => { return res }, 3000)
+  await Promise.all(mapa);
   return res;
 }
 
 const func = checkStatusJava(ips);
-console.log(func);
+setTimeout(() => { console.log(func); }, 4000)
