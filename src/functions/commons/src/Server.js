@@ -5,11 +5,9 @@ const { setTimeout } = require("timers")
 class Server {
   /**
    * @example new Server([client, message, discord])
-   * @param {[client, interaction, discord]} params 
+   * @param {[client, interaction]} params 
    */
   constructor(param) {
-    /** @private */
-    this.param = param; 
     /** @private */
     this.client = param[0];
     /** @private */
@@ -173,20 +171,18 @@ class Server {
     //console.log('F: list -', values);
     return res;
   }
-  /** @param {String[]} listOfIp */
-  checkStatus(listOfIp) {
-    let res = [];
-    listOfIp.map((ip) => {
-      
-    })
-  }
   /** @param {string[]} ipList @returns*/
   javaStatusList() {
     const elements = this.client.config.get(this.interaction.guild.id, "list.server");
     if (elements.length > 0) {
       elements.map((element) => {
-        statusJava(element["ip"])
-        .then((javaServer) => { element["status"] = javaServer.online?"online":"offline" });
+        if (element["ip"] === "") element["status"] = "offline"
+        else {
+          try {
+            statusJava(element["ip"])
+            .then((javaServer) => { element["status"] = javaServer.online?"online":"offline" });
+          } catch(e) {console.log(e)}
+        }
       });
     }
 

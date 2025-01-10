@@ -79,7 +79,7 @@ const rest = new REST().setToken(json.config.token.imperial);
     client.informe.info('deploy', `- ${data.length.toString().green} - Comandos de barra recargados`);
   } catch (e) { client.informe.error('deploy', e) }
 })();
-client.on('shardDisconnect', i => { console.log('[Desconectado]');  } )
+client.on('interactionCreate', i => { console.log('[Desconectado]');  } )
 client.login(json.config.token.imperial)
 
 
