@@ -4,7 +4,7 @@ const {Message, Server} = require('../../functions/commons/index');
 module.exports = {
   name: "list",
   // options: ["list", "clear", "add", "remove", "edit"],
-  // lists: ["ip", "name", "modpack", "version"]
+  // lists: ["ip", "modpack", "version", "status"]
   description: "Almacenamiento de listas especializadas en servidores.",
   data: new discord.SlashCommandBuilder()
 	.setName("list")
@@ -98,41 +98,6 @@ module.exports = {
     response.then(msg => {
       menu(client, msg, servidor, mensaje, embed, component, salida)
     });
-
-    /**
-     * .then(msg => {
-      if (salida.code === 500) msg.edit({ embeds: [embed], components: [component] });
-      servidor.javaStatusList();
-      const collector = msg.createMessageComponentCollector({componentType: discord.ComponentType.StringSelect, time: 900000})
-      collector.on("collect", (collect) => {
-        try { collect.deferUpdate() } catch (e) { client.informe.error("list.collector.deferUpdate", e) }
-        function editEmbedList(name, arr, p) {
-          if (typeof arr === typeof [""]) {
-            embed.setDescription(`\`\`\`\nLista de ${name}es\`\`\``)
-            .setFields([
-              mensaje.arrayFieldGen("position", salida.content.position, true),
-              mensaje.arrayFieldGen("name", salida.content.name, true),
-              mensaje.arrayFieldGen(name, arr, true)
-            ])
-            if (p !== undefined) console.log("[list.reply.editEmbedList<name, arr, p>]: " + p);
-          }
-        }
-        const value = collect.values.shift();
-        switch (value) {
-          case "sip": editEmbedList("ip", salida.content.ip, value); break;
-          case "sversion": editEmbedList("version", salida.content.version, value); break;
-          case "smodpack": editEmbedList("modpack", salida.content.modpack, value); break;
-          case "sstatus": 
-          const estadoJava = servidor.getall().content.status;
-          editEmbedList("status", estadoJava, value);
-          break;
-        }
-        msg.edit({ embeds: [embed], components: [component] });
-      })
-    });
-     * Descripcion
-     * Elementos
-     */
   },
 }
 
