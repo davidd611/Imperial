@@ -2,21 +2,23 @@ require('colors');
 
 module.exports = class LogColor {
   colorear(value, color, underline) { 
-    const colores = {
-      black: value.black,
-      blue: value.blue,
-      cyan: value.cyan,
-      gray: value.gray,
-      green: value.green,
-      grey: value.grey,
-      magenta: value.magenta,
-      red: value.red,
-      white: value.white,
-      yellow: value.yellow
-    }
     let res = value;
-    if (colores[color] === undefined || null) res = value; else res = colores[color]
-    if (underline === true) res = res.underline;
+    try {
+      const colores = {
+        black: value.black,
+        blue: value.blue,
+        cyan: value.cyan,
+        gray: value.gray,
+        green: value.green,
+        grey: value.grey,
+        magenta: value.magenta,
+        red: value.red,
+        white: value.white,
+        yellow: value.yellow
+      }
+      if (colores[color] === undefined || null) res = value; else res = colores[color]
+      if (underline === true) res = res.underline;
+    } catch (e) { console.log(e) }
     return res
   }
   simplificar(value, removeC, removeU) {

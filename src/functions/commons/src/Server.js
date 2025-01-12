@@ -14,45 +14,87 @@ class Server {
     this.interaction = param[1];
     /** @private */
     this.response;
+    /** @private */
+    this.reference = ["ip", "name", "modpack", "version"];
   }
-  setRes(codigo, mensaje, contenido) // esto se supone que redefine la respuesta
-  { this.response = { code: codigo, message: mensaje, content: contenido??null } }
+  // ------------------------------------- Métodos de modificación interna, validación y obtención
+  setRes(codigo, mensaje, contenido) { // esto se supone que redefine la respuesta
+    this.response = { code: codigo??150, message: mensaje??"", content: contenido??null }
+    return this.response;
+  }
+  checkClearList(list) {
+    if (!list.length) {
+      const err = new Error("La lista se encuentra vacia");
+      err.code = 404;
+      throw err;
+    }
+  }
+  checkProperty(property) {
+    if (!this.reference.includes(property)) {
+      const err = new Error("La propiedad de elemento no es valida");
+      err.code = 110;
+      throw err;
+    }
+  }
+  validatePosition(position, min, max) {
+    // valida si position es menor que min o mayor que max, sino, no hace nada
+    // validate if position is minor than min or upper than max, else, doesn't anything
+    if (position < min) {
+      const err = new Error("La posición es demasiado baja");
+      err.code = 120;
+      throw err;
+    }
+    if (position > max) {
+      const err = new Error("la posición es demasiado alta");
+      err.code = 130;
+      throw err;
+    }
+  }
   /** @returns { { code: number, message: string, content: { position, ip, name, modpack, version, status } } } */
   getall() {
     let res = { code: 0, message: "", content: null }
     const elementList = { position: [], ip: [], name: [], modpack: [], version: [], status: [] }
-    // Ingresa a la base de datos con el identificador del servidor y devuelve elementos 
-    // de mayor profundidad
-    const elements = this.client.config.get(this.interaction.guild.id, "list.server")
-    if (elements.length <= 0) { res.code = 404; res.message = "La lista está vacia"; }
-    if (elements.length > 0) {
-      elements.map((element) => {
-        // agrega la posición del objeto dentro del array server a position
-        elementList.position.push(elements.indexOf(element)??"")
-        // mapea las propiedades de cada elementos del array
-        for (const property in element) {
-          elementList[property].push(element[property])
-        }
-      })
-      res.code = 500; res.message = "Se ha obtenido toda la lista de elementos.";
-    }
+    try {
+    // Obtiene elementos con profundidad mayor a la indicada en el segundo argumento
+    const list = this.client.config.get(this.interaction.guild.id, "list.server")
+    // Valida si la lista esta limpia o no
+    this.checkClearList(list);
+    list.map((element) => {
+      // agrega la posición del objeto dentro del array server a position
+      elementList.position.push(list.indexOf(element)??"")
+      // mapea las propiedades de cada elementos del array
+      for (const property in element) {
+        elementList[property].push(element[property])
+      }
+    })
+    res.code = 500; 
+    res.message = "Se ha obtenido toda la lista de elementos.";
     res.content = elementList;
+    } catch(e) {
+      res.code = e.code; 
+      res.message = e.message; 
+      res.content = elementList;
+    }
     return res;
   }
+  // ------------------------------------- Métodos que requieren permisos
   add(args) {
-    const template = { ip: "", name: "", modpack: "", version: "", status: "" }
-    if (args.list === undefined) return this.setRes(100, "No se ha definido - list -");
-    if (template[args.list] === undefined) return this.setRes(110, "La propiedad de elemento no es valida");
-    if (template[args.list] !== undefined) {
-      template[args.list] = args.content??"";
-      // Agrega la plantilla template a el array server
-      this.client.config.push(this.interaction.guild.id, template, "list.server");
-      const newElements = this.getall().content;
-      this.setRes(500, "Elemento añadido", newElements);
+    try {
+      const template = { ip: "", name: "", modpack: "", version: "", status: "" }
+      if (args.list === undefined) return this.setRes(100, "No se ha definido - list -");
+      this.checkProperty(args.list)
+      if (template[args.list] !== undefined) {
+        template[args.list] = args.content??"";
+        // Agrega la plantilla template a el array server
+        this.client.config.push(this.interaction.guild.id, template, "list.server");
+        const newElements = this.getall().content;
+        this.setRes(500, "Elemento añadido", newElements);
+      }
+      return this.response;
+    } catch (e) {
+      return this.setRes(e.code. e.message);
     }
-    return this.response;
   }
-  //-------------------------------------
   /** @private */
   clear() { // Limpia todas las listas
     // Modifica el array, cambiandolo a un array vacio
@@ -65,53 +107,34 @@ class Server {
    
   // y objeto-posición
   remove(args) { // elimina elemento en base a su posición, usa el valor de la propiedad para confirmar
-    const template = { ip: "", name: "", modpack: "", version: "" }
-    const list = this.client.config.get(this.interaction.guild.id, `list.server`);
-    const position = args.position;
-    // Verifica que la propiedad exista, la posicion no sea menor o mayor que el numero de elementos 
-    // de la lista o que la lista este vacia
-    if (!list.length) return this.setRes(404, "No hay elementos para eliminar.");
-    if (position < 0) return this.setRes(120, "Posicion demasiado baja");
-    if (position > list.length-1) return this.setRes(130, 'Posición demasiado alta');
-    if (template[args.list] === undefined) return this.setRes(110, "La propiedad de elemento no es valida");
-    if (args.content !== list[position][args.list]) return this.setRes(320, 'Ambos valores son diferentes');
-    // se compara que la el argumento sea igual a la propiedad del elemento dentro del array
-    if (args.content === list[position][args.list]) { 
+    try {
+      const list = this.client.config.get(this.interaction.guild.id, `list.server`);
+      const position = args.position;
+      // Valida que array no este vacio, posición no sea mayor o menor que el array o objeto diferente
+      this.checkClearList(list)
+      this.validatePosition(position, 0, list.length-1);
+      this.checkProperty(args.list);
+      if (args.content !== list[position][args.list]) return this.setRes(320, 'Ambos valores son diferentes');
       // elimina el elemento de el array
       this.client.config.remove(this.interaction.guild.id, list[position], 'list.server');
       const all = this.getall()
       this.setRes(500, `El elemento de la posición ${position} ha sido eliminado.`, all.content);
+    } catch (e) {
+      //this.client.informe.error("Server.remove", e.message)
+      this.setRes(e.code, e.message)
     }
-    /*
-    if (template[args.list] !== undefined) {
-      if (list.length > 0) {
-        if (position <= list.length-1) {
-          if (args.content === list[position][args.list]) {
-            this.client.config.remove(this.interaction.guild.id, list[position], 'list.server');
-            const all = this.getall()
-            this.setRes(500, `El elemento de la posición ${position} ha sido eliminado.`, all.content);
-          } else this.setRes(320, 'Ambos valores son diferentes');
-        } else if (position < 0) this.setRes(120, "Posicion demasiado baja");
-        else if (position > list.length-1) this.setRes(130, 'Posición demasiado alta');
-        else this.setRes(404, "Ha ocurrido un error inesperado.");
-      } else { this.setRes(404, "No hay elementos para eliminar.") }
-    } else this.setRes(110, "La propiedad de elemento no es valida");
-    */
-    return this.response;
+    return this.response
   }
   /** @private */
   edit(args) { // edita la propiedad de un elemento en base a su posición en la lista
-    const template = { ip: "", name: "", modpack: "", version: "" }
-    const list = this.client.config.get(this.interaction.guild.id, `list.server`)
-    const lists = this.getall();
-    // Verifica que la propiedad ingresada sea valida, el codigo sea 500, no sea menor o mayor que 
-    // el numero de objetos del array
-    if (template[args.list] === undefined) return this.setRes(110, "La propiedad de elemento no es valida");
-    if (lists.code !== 500) return this.setRes(404, lists.message);
-    if (args.position <= 0) return this.setRes(120, "Posicion demasiado baja");
-    if (args.position > list.length) return this.setRes(130, 'Posición demasiado alta');
-
-    if (args.position < list.length) {
+    try {
+      const template = { ip: "", name: "", modpack: "", version: "" }
+      const list = this.client.config.get(this.interaction.guild.id, `list.server`)
+      const lists = this.getall();
+      // valida la propiedad ingresada, el codigo sea 500, no sea menor o mayor a los objetos del array
+      this.checkProperty(args.list);
+      if (lists.code !== 500) return this.setRes(404, lists.message);
+      this.validatePosition(args.position, 0, list.length-1)
       // obtiene el valor del parametro dentro del objeto usando la posición del objeto
       const elementParam = list[args.position][args.list];
       // Modifica temporalmente el parametro del objeto
@@ -122,9 +145,12 @@ class Server {
       this.client.config.update(this.interaction.guild.id, config);
       const all = this.getall();
       this.setRes(500, `El valor de parametro -${elementParam}- se ha cambiado a -${args.content}-.`, all.content);
+    } catch (e) {
+      this.setRes(e.code, e.message)
     }
     return this.response;
   }
+  // ------------------------------------- Métodos de entrada y selección
   chooseFunc(args) {
     let itHave = false;
     const clase = this;
@@ -144,7 +170,7 @@ class Server {
         console.log("[Server.chooseFunc] Función llamada con exito... o error");
       } 
     })
-    if (!itHave) this.setRes(110, `No se reconoce la opción ${args.option}`);
+    if (!itHave) return this.setRes(110, `No se reconoce la opción ${args.option}`);
     return this.response;
   }
 
@@ -185,6 +211,7 @@ class Server {
   //             //         0    1  2       3
   list(values) { // i! list edit ip nuevaIp 0(posición)
     let res = { code: 0, message: "", content: null }
+    // llama chooseFunc para que seleccione la función
     const choiceRes = this.chooseFunc(values)
     // Obtiene el codigo de respuesta independientemente del resultado
     res.code = choiceRes.code;
@@ -194,6 +221,7 @@ class Server {
     //console.log('F: list -', values);
     return res;
   }
+  // ------------------------------------- Funciones de verificaciones externas
   /** @param {string[]} ipList @returns*/
   javaStatusList() {
     const elements = this.client.config.get(this.interaction.guild.id, "list.server");
@@ -204,7 +232,7 @@ class Server {
         try {
           // Comprueba el estado del servidor
           statusJava(element["ip"])
-          // espera a que se resuelva la promesa de statusJava y verifica si devuelve online o offline
+          // Cuando se resuelva la promesa statusJava cambia status a online o offline
           .then((javaServer) => { element["status"] = javaServer.online?"online":"offline" });
         } catch(e) {console.log(e)}
       }

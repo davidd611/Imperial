@@ -1,8 +1,0 @@
-[6/1/2025][2:42:46] [INFO][INFORMER] [Nombre de archivo establecido] [6-1-2025][2-42-46].log
-[6/1/2025][2:42:46] [WARNING][HANDLER] [Al archivo le faltan las propiedades - data - o - execute -] test.js
-[6/1/2025][2:42:46] [INFO][HANDLER] [- 4 - Eventos cargados] 
-[6/1/2025][2:42:46] [INFO][HANDLER] [- 4 - Comandos cargados] 
-[6/1/2025][2:42:46] [INFO][HANDLER] [- 3 - Comandos de barra cargados] 
-[6/1/2025][2:42:46] [INFO][DEPLOY] [- 3 - Comandos de barra recargandose en la aplicación] 
-[6/1/2025][2:42:46] [INFO][DEPLOY] [- 3 - Comandos de barra recargados] 
-[6/1/2025][2:42:46] [INFO][CLIENT] [El cliente - [4mImperial Kings[24m - se encuentra activo] 

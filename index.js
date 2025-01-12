@@ -63,7 +63,7 @@ for (const categoria of comandos) {
 }
 client.informe.info('handler', `- ${events.toString().green} - Eventos cargados`)
 client.informe.info('handler', `- ${commands.toString().green} - Comandos cargados`, false)
-client.informe.info('handler', `- ${slashCommands.length.toString().green} - Comandos de barra cargados`);
+client.informe.info('handler', `- ${slashCommands.length.toString().green} - Comandos de barra leídos`);
 
 const rest = new REST().setToken(json.config.token.imperial);
 

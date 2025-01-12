@@ -37,9 +37,11 @@ module.exports = {
   execute: async (client, interaction) => {
     const mensaje = new Message([interaction, discord]);
     const servidor = new Server([client, interaction]);
+    const opcion =interaction.options.getString("option")??"list"
+    const lista = interaction.options.getString("list")??"";
     const entradas = {
-      option: interaction.options.getString("option")??"list",
-      list: interaction.options.getString("list"),
+      option: opcion.toLowerCase(),
+      list: lista.toLowerCase(),
       content: interaction.options.getString("content"),
       position: interaction.options.getInteger("position")
     }
@@ -69,10 +71,10 @@ module.exports = {
   /** @param {discord.Client} client * @param {discord.Message} message * @param {string[]} args */
   run: (client, message, args) => { // !i list <lista> <opcion> <contenido> <posicion>
     const opcion = args[0]??"list";
-    const lista = args[1];
+    const lista = args[1]??""
     const contenido = args[2];
     const posicion = args[3];
-    const entradas = { option: opcion, list: lista, content: contenido, position: posicion }
+    const entradas = { option: opcion.toLowerCase(), list: lista.toLowerCase(), content: contenido, position: posicion }
     const mensaje = new Message([message, discord]);
     const servidor = new Server([client, message]);
     const salida = servidor.list(entradas);
