@@ -35,9 +35,9 @@ module.exports = {
   /** @TODO Trabajar a partir de ahora en adaptar el contenido del comando run en el execute */
   /** @param {discord.Client} client * @param {discord.Interaction} interaction */
   execute: async (client, interaction) => {
-    const mensaje = new Message([interaction, discord]);
-    const servidor = new Server([client, interaction]);
-    const opcion =interaction.options.getString("option")??"list"
+    const mensaje = new Message(interaction, discord);
+    const servidor = new Server(client, interaction);
+    const opcion = interaction.options.getString("option")??"list"
     const lista = interaction.options.getString("list")??"";
     const entradas = {
       option: opcion.toLowerCase(),
@@ -63,9 +63,8 @@ module.exports = {
         new discord.StringSelectMenuOptionBuilder().setLabel("status").setValue("sstatus"),
       )
     );
-    await interaction.reply({ embeds: [embed] }).then((msg) => { 
-      menu(client, msg, servidor, mensaje, embed, component, salida) 
-    });
+    const msg = await interaction.reply({ embeds: [embed] });
+    menu(client, msg, servidor, mensaje, embed, component, salida)
   },
   //-------------------------------------------------------------------------------------------
   /** @param {discord.Client} client * @param {discord.Message} message * @param {string[]} args */
@@ -75,8 +74,8 @@ module.exports = {
     const contenido = args[2];
     const posicion = args[3];
     const entradas = { option: opcion.toLowerCase(), list: lista.toLowerCase(), content: contenido, position: posicion }
-    const mensaje = new Message([message, discord]);
-    const servidor = new Server([client, message]);
+    const mensaje = new Message(message, discord);
+    const servidor = new Server(client, message);
     const salida = servidor.list(entradas);
     console.log("[run] - entradas:\n", opcion, lista, contenido, posicion);
     const embed = new discord.EmbedBuilder().setDescription(`\`\`\`\n${salida.message}\`\`\``)

@@ -1,13 +1,19 @@
 class Guild {
   /**
    * @example new Guild([message, client])
-   * @param {[message, client]} param
+   * @param { discord.Interaction | discord.Message } interaction
+   * @param { discord.Client } client 
    * @returns {[object, void]}
   */
-  constructor(param) {
+  constructor(interaction, client) {
     /** @private */
-    this.param = param
+    this.interaction = interaction;
+    /** @private */
+    this.client = client;
   }
-  prefix() { return this.param[1].config.get(this.param[0].guild.id, 'prefix') }
+  /** @param {string} newPrefix */
+  setPrefix(newPrefix) { this.client.config.set(this.interaction.guild.id, newPrefix, 'prefix'); }
+  getDefaultPrefix() { return this.client.config.get(this.interaction.guild.id, 'defaultPrefix') }
+  getPrefix() { return this.client.config.get(this.interaction.guild.id, 'prefix') }
 }
 module.exports = Guild;

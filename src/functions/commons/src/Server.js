@@ -1,17 +1,18 @@
 const minecraftServer = require("mcstatus-util");
 const { statusJava, statusBedrock } = require("node-mcstatus")
-const functions = require("./statics.json").functions;
+const { functions } = require("./statics.json");
 const { setTimeout } = require("timers")
 class Server {
   /**
    * @example new Server([client, message, discord])
-   * @param {[client, interaction]} params 
+   * @param {discord.Client} client
+   * @param {discord.Interaction | discord.Message} interaction
    */
-  constructor(param) {
+  constructor(client, interaction) {
     /** @private */
-    this.client = param[0];
+    this.client = client;
     /** @private */
-    this.interaction = param[1];
+    this.interaction = interaction;
     /** @private */
     this.response;
     /** @private */
@@ -55,21 +56,22 @@ class Server {
     let res = { code: 0, message: "", content: null }
     const elementList = { position: [], ip: [], name: [], modpack: [], version: [], status: [] }
     try {
-    // Obtiene elementos con profundidad mayor a la indicada en el segundo argumento
-    const list = this.client.config.get(this.interaction.guild.id, "list.server")
-    // Valida si la lista esta limpia o no
-    this.checkClearList(list);
-    list.map((element) => {
-      // agrega la posición del objeto dentro del array server a position
-      elementList.position.push(list.indexOf(element)??"")
-      // mapea las propiedades de cada elementos del array
-      for (const property in element) {
-        elementList[property].push(element[property])
-      }
-    })
-    res.code = 500; 
-    res.message = "Se ha obtenido toda la lista de elementos.";
-    res.content = elementList;
+      // Obtiene elementos con profundidad mayor a la indicada en el segundo argumento
+      const list = this.client.config.get(this.interaction.guild.id, "list.server")
+      // Valida si la lista esta limpia
+      this.checkClearList(list);
+      // mapea el array list
+      list.map((element) => {
+        // agrega la posición del objeto dentro del array server a position
+        elementList.position.push(list.indexOf(element)??"")
+        // mapea las propiedades de cada elementos del array
+        for (const property in element) {
+          elementList[property].push(element[property])
+        }
+      })
+      res.code = 500; 
+      res.message = "Se ha obtenido toda la lista de elementos.";
+      res.content = elementList;
     } catch(e) {
       res.code = e.code; 
       res.message = e.message; 
@@ -78,10 +80,10 @@ class Server {
     return res;
   }
   // ------------------------------------- Métodos que requieren permisos
+  /** @private */
   add(args) {
     try {
       const template = { ip: "", name: "", modpack: "", version: "", status: "" }
-      if (args.list === undefined) return this.setRes(100, "No se ha definido - list -");
       this.checkProperty(args.list)
       if (template[args.list] !== undefined) {
         template[args.list] = args.content??"";
@@ -97,15 +99,13 @@ class Server {
   }
   /** @private */
   clear() { // Limpia todas las listas
-    // Modifica el array, cambiandolo a un array vacio
+    // Modifica el array, estableciendolo en un array vacio.
     this.client.config.set(this.interaction.guild.id, [], `list.server`);
     const all = this.getall();
     this.setRes(500, "Todos los elementos han sido eliminados.", all.content);
     return this.response;
   }
   /** @private */
-   
-  // y objeto-posición
   remove(args) { // elimina elemento en base a su posición, usa el valor de la propiedad para confirmar
     try {
       const list = this.client.config.get(this.interaction.guild.id, `list.server`);
@@ -131,9 +131,9 @@ class Server {
       const template = { ip: "", name: "", modpack: "", version: "" }
       const list = this.client.config.get(this.interaction.guild.id, `list.server`)
       const lists = this.getall();
-      // valida la propiedad ingresada, el codigo sea 500, no sea menor o mayor a los objetos del array
+      // Valida que array no este vacio, posición no sea mayor o menor que el array
       this.checkProperty(args.list);
-      if (lists.code !== 500) return this.setRes(404, lists.message);
+      this.checkClearList(list)
       this.validatePosition(args.position, 0, list.length-1)
       // obtiene el valor del parametro dentro del objeto usando la posición del objeto
       const elementParam = list[args.position][args.list];
@@ -161,12 +161,12 @@ class Server {
       console.log("[Server.ChooseFunc]", args.option, alias)
       if (alias) {
         itHave = true; 
-        // Comprueba si la función no require permisos
+        // Comprueba si la función no require permisos y si el usuario tiene los permisos necesarios
         if (!element.permissions) return this.response = this[element.function](args);
+        if (!memberPermissions) return this.setRes(200, 'permisos insuficientes para realizar esta acción');
         // comprueba que los permisos del usuario sean true y lláma a la función indicada
         if (memberPermissions) this.response = this[element.function](args);
         // Caso contrario, devuelve los permisos insuficientes
-        else this.setRes(200, 'permisos insuficientes para realizar esta acción');
         console.log("[Server.chooseFunc] Función llamada con exito... o error");
       } 
     })
@@ -175,38 +175,20 @@ class Server {
   }
 
   /** 
-   * @description 
-   * Takes an Array of strings, and depending of the content return a new value without modifiy the orginal Array
-   * i! list ip edit nuevaIp 0
-   * i! list ip add nuevaIp
-   * i! list ip remove nuevaIp 0
-   * i! list ip clear
-   * i! list ip list
+   * Use an object who is defined with: option, list, content and position respectibly.
+   * 
    * @example
    * const values = [
    *   {
-   *     option: string, // options: list, clear, add, remove, edit
+   *     option: string, // list, clear, add, remove, edit
    *     list: string // ip, name, modpack, version
-   *     content: string, // "sdasdsf"
-   *     position: number // 0, 1, 2, 3, 4, 5, 6, 7
+   *     content: string, // "an argument of any type that you want to input here"
+   *     position: number // too long how is the list of the guild
    *   },
    *   ...
    * ]
    * const list = new Server(client, interaction).list(values)
-   
    * @param {string[]} values 
-   * 
-   * codes = {
-   *  100: valor no definido
-   *  110: valor invalido
-   *  120: Posición demasiado baja
-   *  130: Posición demasiado alta
-   *  150: Error inesperado
-   *  200: Permisos insuficientes
-   *  320: Ambos valores diferentes
-   *  404: Elemento no existente
-   *  500: Exito
-   * }
    */
   //             //         0    1  2       3
   list(values) { // i! list edit ip nuevaIp 0(posición)
@@ -222,7 +204,10 @@ class Server {
     return res;
   }
   // ------------------------------------- Funciones de verificaciones externas
-  /** @param {string[]} ipList @returns*/
+  /**
+   * Change status property of all objects in the server list who it's an array of objects
+   * @returns 
+   */
   javaStatusList() {
     const elements = this.client.config.get(this.interaction.guild.id, "list.server");
     if (elements.length <= 0) return

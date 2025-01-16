@@ -1,4 +1,4 @@
-const informe = require('./src/functions/informe/index');
+const { LogEntry } = require('./src/functions/informe/index');
 const commons = require('./src/functions/commons/index');
 const json = require('../config.json');
 const { Client, GatewayIntentBits, Partials, Collection, REST, Routes, EmbedBuilder } = require('discord.js');
@@ -27,7 +27,7 @@ const client = new Client({
 });
 
 let events = 0, commands = 0, slashCommands = [];
-client.informe = informe.LogEntry;
+client.informe = LogEntry;
 client.commands = new Collection();
 client.slashCommands = new Collection();
 client.config = new Enmap({ dataDir: './src/database', name: 'config', fetchAll: false, autoFetch: true, cloneLevel: 'deep' })
@@ -67,19 +67,20 @@ client.informe.info('handler', `- ${slashCommands.length.toString().green} - Com
 
 const rest = new REST().setToken(json.config.token.imperial);
 
-(async () => {
-  try {
+(async() => { 
+  try { 
     client.informe.info('deploy', `- ${slashCommands.length.toString().green} - Comandos de barra recargandose en la aplicación`);
 
     const data = await rest.put(
       Routes.applicationCommands(json.config.client.imperial),
       { body: slashCommands}
     )
-
     client.informe.info('deploy', `- ${data.length.toString().green} - Comandos de barra recargados`);
-  } catch (e) { client.informe.error('deploy', e) }
+  } catch (e) { 
+    client.informe.error('deploy', e.message); 
+  }
 })();
-client.on('interactionCreate', i => { console.log('[Desconectado]');  } )
+client.on('error', i => { console.log('[Desconectado: Error]');  } )
 client.login(json.config.token.imperial)
 
 
