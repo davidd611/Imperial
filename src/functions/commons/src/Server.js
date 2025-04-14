@@ -1,4 +1,3 @@
-const minecraftServer = require("mcstatus-util");
 const { statusJava, statusBedrock } = require("node-mcstatus")
 const { functions } = require("./statics.json");
 const { setTimeout } = require("timers")
@@ -25,30 +24,30 @@ class Server {
   }
   checkClearList(list) {
     if (!list.length) {
-      const err = new Error("La lista se encuentra vacia");
+      const voidListError = new Error("La lista se encuentra vacia");
       err.code = 404;
-      throw err;
+      throw voidListError;
     }
   }
   checkProperty(property) {
     if (!this.reference.includes(property)) {
-      const err = new Error("La propiedad de elemento no es valida");
+      const invalidPropertyError = new Error("La propiedad de elemento no es valida");
       err.code = 110;
-      throw err;
+      throw invalidPropertyError;
     }
   }
   validatePosition(position, min, max) {
     // valida si position es menor que min o mayor que max, sino, no hace nada
     // validate if position is minor than min or upper than max, else, doesn't anything
     if (position < min) {
-      const err = new Error("La posición es demasiado baja");
+      const minPositionError = new Error("La posición es demasiado baja");
       err.code = 120;
-      throw err;
+      throw minPositionError;
     }
     if (position > max) {
-      const err = new Error("la posición es demasiado alta");
+      const maxPositionError = new Error("la posición es demasiado alta");
       err.code = 130;
-      throw err;
+      throw maxPositionError;
     }
   }
   /** @returns { { code: number, message: string, content: { position, ip, name, modpack, version, status } } } */
@@ -209,8 +208,17 @@ class Server {
    * @returns 
    */
   javaStatusList() {
-    const elements = this.client.config.get(this.interaction.guild.id, "list.server");
-    if (elements.length <= 0) return
+    const elementList = this.client.config.get(this.interaction.guild.id, "list.server");
+    if (elements.length <= 0) return;
+    let position = 0;
+    elementList.map((element) => {
+      if (!this.hasIp) this.updateStatus(elementList, position, false);
+      else updateStatus(elementList, position, this.getStatusJava(element.ip, position));
+      position++;
+    })
+    return this;
+  }
+  /*
     elements.map((element) => {
       if (element["ip"] === "") element["status"] = "offline"
       else {
@@ -222,6 +230,26 @@ class Server {
         } catch(e) {console.log(e)}
       }
     });
+  }
+    */
+  
+  getStatusJava(ip, position) {
+    try {
+      let res = { status: false , position: position }
+      statusJava(ip)
+      .then((javaServer) => { 
+        res.status = javaServer.online; 
+        return res 
+      })
+    } catch (e) { console.log(e) }
+  }
+  hasIp(element) {
+    if (element.ip === "") return false;
+    return true;
+  }
+  updateStatus(list, position, status) {
+    list[position].status = status?"online":"offline";
+    return this;
   }
 }
 module.exports = Server

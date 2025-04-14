@@ -7,6 +7,7 @@ Actualmente contamos con un total de 2 comandos, ambos tanto en barra como en co
 comandos en funcionamiento: 1 - list -
 comandos en mantenimiento: 1 - prefix -
 
+
 ```js
   /* Codigos de respuesta */
    100: valor no definido
@@ -19,6 +20,13 @@ comandos en mantenimiento: 1 - prefix -
    404: Elemento no existente
    500: Exito
 ```
+Dependencias:
+  > **discord.js**
+  > **enmap**
+  > **colors**
+  > **node-mcstatus**
+
+
 Este trabajo está siendo mantenido actualmente en producción por parte de:
  **davidd611**
  **SrNadien**
