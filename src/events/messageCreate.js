@@ -5,8 +5,7 @@ module.exports = (client, message) => {
   console.log(`Mensaje: [${message.author.username.magenta.underline}] ${message.content.cyan}`);
 
   const guildConfig = client.config.get(message.guild.id);
-  console.log(guildConfig)
-  if (guildConfig === undefined) {
+  if (!guildConfig) {
     client.config.ensure(message.guild.id, {
       prefix: "i!",
       defaultPrefix: "i!",
@@ -15,13 +14,14 @@ module.exports = (client, message) => {
       }
     });
   }
-
+  const hasConfig = (!!guildConfig)
+  console.log(guildConfig, hasConfig)
   let prefix = client.config.get(message.guild.id, "prefix")
 
   if (message.author.bot) return;
   if (!message.content.startsWith(prefix)) return;
   const args = message.content.slice(prefix.length).trim().split(/ +/g);
-  const command = args.shift()?.toLowerCase()
+  const command = args.shift().toLowerCase()
   
   try {
     const cmd = client.commands.get(command)

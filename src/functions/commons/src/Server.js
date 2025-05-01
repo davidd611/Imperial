@@ -1,4 +1,4 @@
-const minecraftServer = require("mcstatus-util");
+// Deprecated -- const minecraftServer = require("mcstatus-util");
 const { statusJava, statusBedrock } = require("node-mcstatus")
 const { functions } = require("./statics.json");
 const { setTimeout } = require("timers")
@@ -131,7 +131,7 @@ class Server {
       const template = { ip: "", name: "", modpack: "", version: "" }
       const list = this.client.config.get(this.interaction.guild.id, `list.server`)
       const lists = this.getall();
-      // Valida que array no este vacio, posición no sea mayor o menor que el array
+      // Valida las propiedades, si el array esta vacio y que posición no se mayor o menor que el tamaño maximo del array
       this.checkProperty(args.list);
       this.checkClearList(list)
       this.validatePosition(args.position, 0, list.length-1)

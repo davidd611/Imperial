@@ -3,7 +3,7 @@ const commons = require('./src/functions/commons/index');
 const json = require('../config.json');
 const { Client, GatewayIntentBits, Partials, Collection, REST, Routes, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
-const Enmap = require('enmap');
+const Enmap = require('enmap').default;
 
 const client = new Client({
   intents: [
