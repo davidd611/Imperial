@@ -30,23 +30,23 @@ let events = 0, commands = 0, slashCommands = [];
 client.informe = LogEntry;
 client.commands = new Collection();
 client.slashCommands = new Collection();
-client.config = new Enmap({ dataDir: './src/database', name: 'config', fetchAll: false, autoFetch: true, cloneLevel: 'deep' })
+client.config = new Enmap({ dataDir: `${__dirname}/src/database`, name: 'config', fetchAll: false, autoFetch: true, cloneLevel: 'deep' })
 client.commons = commons
 
-
-const eventos = fs.readdirSync('./src/events');
+const path = `${__dirname}/`
+const eventos = fs.readdirSync(path + "src/events"); 
 for (const evento of eventos) {
   const nombreEvento = evento.split('.')[0];
-  const event = require(`./src/events/${evento}`);
+  const event = require(path + `src/events/${evento}`);
   client.on(nombreEvento, event.bind(null, client));
   events++
 }
 
-const comandos = fs.readdirSync('./src/commands');
+const comandos = fs.readdirSync(path + "src/commands");
 for (const categoria of comandos) {
-  fs.readdirSync(`./src/commands/${categoria}`).forEach(comando => {
+  fs.readdirSync(path + `src/commands/${categoria}`).forEach(comando => {
     const nombreComando = comando.split('.')[0];
-    const command = require(`./src/commands/${categoria}/${comando}`);
+    const command = require(path + `src/commands/${categoria}/${comando}`);
     if ('run' in command) {
       client.commands.set(nombreComando, command);
       commands++;
