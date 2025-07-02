@@ -48,6 +48,22 @@ class CustomList {
       throw voidListError
     }
   }
+  existElement(list, element) {
+    if (list[element] === undefined) {
+      const noExistElementError = new Error("The specified element doesn't exist yet")
+      noExistElementError.code = 404;
+      throw noExistElementError;
+    } 
+  }
+  /** @param {string} name * @param {number} pos * @param {object} list   */
+  NameOfPosition(name, elemPos, list) {
+    existElemenet(list, elemPos)
+    if (name.toLowerCase() !== list[elemPos]) {
+      const incorrectElementError = new Error("The specified name isn't the real position element name")
+      incorrectElementError.code = 203;
+      throw incorrectElementError;
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // --- RESPONSE --------------------------------------------------------------
@@ -59,7 +75,6 @@ class CustomList {
 
   // ---------------------------------------------------------------------------
   // --- GETTERS ---------------------------------------------------------------
-
   /** @private */
   getRealListName(listName) {
     const listNames = this.getAllCustoms().content; // {retorna un objeto con todas las listas}
@@ -78,12 +93,19 @@ class CustomList {
     this.isVoid(list)
     return this.returnRes(200, "List found", list)
   }
-  getCustomElement(name, element) {
-    const customList = this.getCustom(name)
-    customList.content.map((element) => {
-      element.map((property) => {
-        // aca van las propiedades de un elemento dentro de un array
-      })
+  getCustomElement(customName, element) {
+    const customList = this.getCustom(customName)
+    const properties = {} // Propiedades a devolver como un objeto
+    let reference = customList[1] // Posición 1; String, referencia, comprobar entodos los elementos
+    customList.content.map((elem) => {
+      if (customList.content.indexOf(elem) <= 1) return; // si el recorrido es menor a 2, retorna;
+      // Comprobar si el elemento de referencia es igual al introducido por el usuario
+      if(element.toLowerCase() === elem[reference]) {
+        elem.map((property) => {
+          // Agrega la propiedad a la constante properties
+          properties[property] = elem[property];
+        })
+      }
     })
   }
   // ---------------------------------------------------------------------------
@@ -92,7 +114,7 @@ class CustomList {
   createCustom(name, params) {
     // Comprueba si ya existe una lista con el mismo nombre
     this.alreadyExist(this.getAllCustoms().content[name])
-    const template = [[]]
+    const template = [[], ""] // [1[]: parametros, "2": referencia]
     //
     params.replace(/ +/g, "").split(",").map((param) => { template[0].push(param) })
     this.client.config.push(this.interaction.guild.id, template, `list.custom`)
@@ -117,8 +139,16 @@ class CustomList {
   }
   // ---------------------------------------------------------------------------
   // --- REMOVE ----------------------------------------------------------------
+  removeCustom(customs, customName) {
+
+  }
+  removeCustomElement(customName, elementPos, elementName) {}
   // ---------------------------------------------------------------------------
   // --- CLEAR -----------------------------------------------------------------
+  clearCustom(customName, confirmationCustomName) {}
+  clearCustoms(confirmation=false) {}
   // ---------------------------------------------------------------------------
   // --- EDIT ------------------------------------------------------------------
+  editCustom(customPos, newCustomName) {}
+  editCustomElement(customName, elementPos, newElementName) {}
 }
