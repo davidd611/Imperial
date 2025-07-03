@@ -1,6 +1,6 @@
 const { LogEntry } = require('./src/functions/informe/index');
 const commons = require('./src/functions/commons/index');
-const json = require('../config.json');
+const json = require('./config.json');
 const { Client, GatewayIntentBits, Partials, Collection, REST, Routes, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const Enmap = require('enmap').default;
@@ -77,7 +77,7 @@ const rest = new REST().setToken(json.config.token.imperial);
     )
     client.informe.info('deploy', `- ${data.length.toString().green} - Comandos de barra recargados`);
   } catch (e) { 
-    client.informe.error('deploy', e.message); 
+    client.informe.error('deploy', e.message + e.stack); 
   }
 })();
 client.on('error', i => { console.log('[Desconectado: Error]');  } )

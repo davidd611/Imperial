@@ -42,7 +42,7 @@
   ],
   "functions": [
     {
-      "alias": ["list", "getall", "all", "view", "lista", "todo", "ver"],
+      "alias": ["list", "getall", "all", "view", "lista", "todo", "ver", ""],
       "function": "getall",
       "permissions": false
     },

@@ -37,7 +37,7 @@ module.exports = {
   execute: async (client, interaction) => {
     const mensaje = new Message(interaction, discord);
     const servidor = new Server(client, interaction);
-    const opcion = interaction.options.getString("option")??"list"
+    const opcion = interaction.options.getString("option")??"";
     const lista = interaction.options.getString("list")??"";
     const entradas = {
       option: opcion.toLowerCase(),
@@ -63,8 +63,10 @@ module.exports = {
         new discord.StringSelectMenuOptionBuilder().setLabel("status").setValue("sstatus"),
       )
     );
-    const msg = await interaction.reply({ embeds: [embed] });
-    menu(client, msg, servidor, mensaje, embed, component, salida)
+    try {
+      const msg = await interaction.reply({ embeds: [embed] });
+      menu(client, msg, servidor, mensaje, embed, component, salida);
+    } catch (e) { console.log(e) }
   },
   //-------------------------------------------------------------------------------------------
   /** @param {discord.Client} client * @param {discord.Message} message * @param {string[]} args */
@@ -95,10 +97,14 @@ module.exports = {
         new discord.StringSelectMenuOptionBuilder().setLabel("status").setValue("sstatus"),
       )
     );
-    const response = message.reply({ embeds: [embed] })
-    response.then(msg => {
-      menu(client, msg, servidor, mensaje, embed, component, salida)
-    });
+    try {
+      const response = message.reply({ embeds: [embed] })
+      response.then(msg => {
+        menu(client, msg, servidor, mensaje, embed, component, salida)
+      });
+    } catch (e) {
+      console.log(e)
+    }
   },
 }
 
@@ -109,6 +115,7 @@ function menu(client, msg, servidor, mensaje, embed, component, salida) {
   collector.on("collect", async (collect) => {
     try { collect.deferUpdate() } catch (e) { client.informe.error("list.collector.deferUpdate", e) }
     function editEmbedList(name, arr, p) {
+      if (p !== undefined) console.log("[list.reply.editEmbedList<name, arr, p>]: " + p);
       if (typeof arr === typeof [""]) {
         embed.setDescription(`\`\`\`\nLista de ${name}es\`\`\``)
         .setFields([
@@ -116,7 +123,6 @@ function menu(client, msg, servidor, mensaje, embed, component, salida) {
           mensaje.arrayFieldGen("name", salida.content.name, true),
           mensaje.arrayFieldGen(name, arr, true)
         ])
-        if (p !== undefined) console.log("[list.reply.editEmbedList<name, arr, p>]: " + p);
       }
     }
     const value = collect.values.shift();

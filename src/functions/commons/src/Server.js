@@ -135,19 +135,19 @@ class Server {
       this.checkProperty(args.list);
       this.checkClearList(list)
       this.validatePosition(args.position, 0, list.length-1)
-      // obtiene el valor del parametro dentro del objeto usando la posición del objeto
-      const elementParam = list[args.position][args.list];
+
       // Modifica temporalmente el parametro del objeto
       list[args.position][args.list] = args.content;
-      // obtiene el array de objetos
-      const config = this.client.config.get(this.interaction.guild.id);
+      // obtiene el valor del parametro dentro del objeto usando la posición del objeto
+      const newParamValue = list[args.position][args.list];
       // actualiza el array de objetos dentro de la base de datos
-      this.client.config.update(this.interaction.guild.id, config);
+      this.client.config.set(this.interaction.guild.id, list, 'list.server');
       const all = this.getall();
-      this.setRes(500, `El valor de parametro -${elementParam}- se ha cambiado a -${args.content}-.`, all.content);
+      this.setRes(500, `El valor de parametro -${args.list}- se ha cambiado a -${newParamValue}-.`, all.content);
     } catch (e) {
       this.setRes(e.code, e.message)
     }
+    console.log(this.response)
     return this.response;
   }
   // ------------------------------------- Métodos de entrada y selección
@@ -210,18 +210,25 @@ class Server {
    */
   javaStatusList() {
     const elements = this.client.config.get(this.interaction.guild.id, "list.server");
-    if (elements.length <= 0) return
+    if (!elements) return
     elements.map((element) => {
-      if (element["ip"] === "") element["status"] = "offline"
+      if (element["ip"] === "") element.status = "offline"
       else {
         try {
           // Comprueba el estado del servidor
           statusJava(element["ip"])
           // Cuando se resuelva la promesa statusJava cambia status a online o offline
-          .then((javaServer) => { element["status"] = javaServer.online?"online":"offline" });
+          .then((javaServer) => { 
+            element.status = javaServer.online?"online":"offline";
+            const elemPos = elements.indexOf(element)
+            this.client.config.set(this.interaction.guild.id, element, `list.server[${elemPos}]`);
+            console.log("[javaStatusList.elements.map.set]", elements)
+          });
         } catch(e) {console.log(e)}
       }
     });
+    
+    
   }
 }
 module.exports = Server
